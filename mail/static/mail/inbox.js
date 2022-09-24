@@ -46,11 +46,15 @@ function send_email(e) {
       console.log(jsonResponse);
       if ("error" in jsonResponse) {
         const element = document.createElement("div");
-        element.className = "alert alert-danger";
+        element.className = "alert alert-danger wrong-email";
         element.innerHTML = jsonResponse.error;
         compose_email(recipients, subject, body);
         document.querySelector("#compose-view").append(element);
       } else {
+        const errorMessage = document.querySelectorAll(".wrong-email");
+        if (errorMessage) {
+          errorMessage.forEach((e) => e.remove());
+        }
         const element = document.createElement("div");
         element.className = "alert alert-success";
         element.innerHTML = jsonResponse.message;
