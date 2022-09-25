@@ -1,4 +1,4 @@
-import { sendEmail } from "./api.js";
+import { sendEmail, loadMailbox, readEmail, markRead } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   // Use buttons to toggle between views
@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function compose_email(recipients = "", subject = "", body = "") {
   // Show compose view and hide other views
   document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#read-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "block";
 
   // Clear out composition fields
@@ -24,16 +25,49 @@ function compose_email(recipients = "", subject = "", body = "") {
 function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector("#emails-view").style.display = "block";
+  document.querySelector("#read-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
 
   // Show the mailbox name
   document.querySelector("#emails-view").innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  loadMailbox(mailbox)
+    .then((res) => res.json())
+    .then((jsonResponse) => {
+      jsonResponse.forEach((e) => {
+        const element = document.createElement("div");
+        element.className = "row border border-dark email";
+        if (e.read) {
+          element.className += " read";
+        } else {
+          element.className += " not-read";
+        }
+        const sender = `<span> <strong>${e.sender}</strong></span>`;
+        const timeStamp = `<span class="text-muted">${e.timestamp}</span>`;
+        const subject = `<span class='ml-5'>${e.subject}</span>`;
+        element.innerHTML = `         
+        <div class="col-sm">${sender} ${subject}</div>
+        <div class="col-sm timestamp">${timeStamp} </div>
+        `;
+        element.addEventListener("click", function () {
+          console.log("This element has been clicked!");
+          read_email(e.id);
+
+          if (!e.read) {
+            markRead(e.id)
+              .then((res) => console.log(res))
+              .catch((error) => console.log(error));
+          }
+        });
+        document.querySelector("#emails-view").append(element);
+      });
+    });
 }
 
 function send_email(e) {
   e.preventDefault();
   // Show the mailbox and hide other views
   document.querySelector("#emails-view").style.display = "block";
+  document.querySelector("#read-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "none";
 
   // Show the mailbox name
@@ -64,5 +98,21 @@ function send_email(e) {
     })
     .catch((error) => {
       console.log(error);
+    });
+}
+
+function read_email(id) {
+  // Show the mailbox and hide other views
+  document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#read-view").style.display = "block";
+  document.querySelector("#compose-view").style.display = "none";
+  readEmail(id)
+    .then((res) => res.json())
+    .then((result) => {
+      document.querySelector("#email-from").innerHTML = result.sender;
+      document.querySelector("#email-to").innerHTML = result.recipients.toString();
+      document.querySelector("#email-subject").innerHTML = result.subject;
+      document.querySelector("#email-timestamp").innerHTML = result.timestamp;
+      document.querySelector("#email-body").innerHTML = result.body;
     });
 }
