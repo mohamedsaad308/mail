@@ -113,16 +113,30 @@ function read_email(mailbox, curr) {
       document.querySelector(".email-timestamp").innerHTML = result.timestamp;
       document.querySelector(".email-body").innerHTML = result.body;
       const archiveButton = document.querySelector(".archive-email");
-      if (archiveButton) {
+      const replyButton = document.querySelector(".reply-email");
+      if (archiveButton && replyButton) {
         archiveButton.remove();
+        replyButton.remove();
       }
       if (mailbox !== "sent") {
         const element = document.createElement("button");
         element.className = "btn btn-sm btn-outline-primary archive-email";
-        element.id = `email-${curr.id}`;
-        element.innerHTML = mailbox === "archive" ? "Unarchive" : "archive";
+        element.id = `archive-email-${curr.id}`;
+        element.innerHTML = mailbox === "archive" ? "Unarchive" : "Archive";
+
+        const replyElement = document.createElement("button");
+        replyElement.className = "btn btn-sm btn-outline-primary reply-email ml-2";
+        replyElement.id = `reply-email-${curr.id}`;
+        replyElement.innerHTML = "Reply";
+        const recipients = curr.sender;
+        const subject = curr.subject.startsWith("Re:") ? curr.subject : "Re:" + curr.subject;
+        const body = `On ${curr.timestamp} ${curr.sender} wrote: ${curr.body}`;
+
         element.addEventListener("click", () => archive_email(result.id, !result.archived), false);
         document.querySelector("#email-info").append(element);
+
+        replyElement.addEventListener("click", () => compose_email(recipients, subject, body));
+        document.querySelector("#email-info").append(replyElement);
       }
     });
 }
