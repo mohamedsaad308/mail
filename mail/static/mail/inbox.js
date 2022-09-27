@@ -1,4 +1,4 @@
-import { sendEmail, loadMailbox, readEmail, markRead } from "./api.js";
+import { sendEmail, loadMailbox, readEmail, markRead, archiveEmail } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   // Use buttons to toggle between views
@@ -48,16 +48,8 @@ function load_mailbox(mailbox) {
         <div class="col-sm">${sender} ${subject}</div>
         <div class="col-sm timestamp">${timeStamp} </div>
         `;
-        element.addEventListener("click", function () {
-          console.log("This element has been clicked!");
-          read_email(e.id);
 
-          if (!e.read) {
-            markRead(e.id)
-              .then((res) => console.log(res))
-              .catch((error) => console.log(error));
-          }
-        });
+        element.addEventListener("click", () => read_email(mailbox, e), false);
         document.querySelector("#emails-view").append(element);
       });
     });
@@ -77,7 +69,7 @@ function send_email(e) {
   sendEmail(recipients, subject, body)
     .then((response) => response.json())
     .then((jsonResponse) => {
-      console.log(jsonResponse);
+      // console.log(jsonResponse);
       if ("error" in jsonResponse) {
         const element = document.createElement("div");
         element.className = "alert alert-danger wrong-email";
@@ -101,18 +93,47 @@ function send_email(e) {
     });
 }
 
-function read_email(id) {
+function read_email(mailbox, curr) {
   // Show the mailbox and hide other views
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#read-view").style.display = "block";
   document.querySelector("#compose-view").style.display = "none";
-  readEmail(id)
+  if (!curr.read) {
+    markRead(curr.id)
+      .then((res) => console.log(res))
+      .catch((error) => console.log(error));
+  }
+  readEmail(curr.id)
     .then((res) => res.json())
+
     .then((result) => {
-      document.querySelector("#email-from").innerHTML = result.sender;
-      document.querySelector("#email-to").innerHTML = result.recipients.toString();
-      document.querySelector("#email-subject").innerHTML = result.subject;
-      document.querySelector("#email-timestamp").innerHTML = result.timestamp;
-      document.querySelector("#email-body").innerHTML = result.body;
+      document.querySelector(".email-from").innerHTML = result.sender;
+      document.querySelector(".email-to").innerHTML = result.recipients.toString();
+      document.querySelector(".email-subject").innerHTML = result.subject;
+      document.querySelector(".email-timestamp").innerHTML = result.timestamp;
+      document.querySelector(".email-body").innerHTML = result.body;
+      const archiveButton = document.querySelector(".archive-email");
+      if (archiveButton) {
+        archiveButton.remove();
+      }
+      if (mailbox !== "sent") {
+        const element = document.createElement("button");
+        element.className = "btn btn-sm btn-outline-primary archive-email";
+        element.id = `email-${curr.id}`;
+        element.innerHTML = mailbox === "archive" ? "Unarchive" : "archive";
+        element.addEventListener("click", () => archive_email(result.id, !result.archived), false);
+        document.querySelector("#email-info").append(element);
+      }
+    });
+}
+
+function archive_email(id, status, obj) {
+  archiveEmail(id, status)
+    .then((res) => {
+      // console.log(res);
+      load_mailbox("inbox");
+    })
+    .catch((error) => {
+      console.log(error);
     });
 }

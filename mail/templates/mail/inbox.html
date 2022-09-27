@@ -1,5 +1,5 @@
 {% extends "mail/layout.html" %} {% load static %} {% block body %}
-<h2>{{ request.user.email }}</h2>
+<h2 id="current-user-email">{{ request.user.email }}</h2>
 
 <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
 <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
@@ -25,12 +25,15 @@
   </form>
 </div>
 <div id="read-view">
-  <p><strong>From:</strong> <span id="email-from"></span></p>
-  <p><strong>To:</strong> <span id="email-to"></span></p>
-  <p><strong>Subject:</strong> <span id="email-subject"></span></p>
-  <p><strong>Timestamp:</strong> <span id="email-timestamp"></span></p>
+  <div id="email-info">
+  <p><strong>From:</strong> <span class="email-from"></span></p>
+  <p><strong>To:</strong> <span class="email-to"></span></p>
+  <p><strong>Subject:</strong> <span class="email-subject"></span></p>
+  <p><strong>Timestamp:</strong> <span class="email-timestamp"></span></p>
+
+  </div>
   <hr />
-  <p id="email-body"></p>
+  <p class="email-body"></p>
 </div>
 {% endblock %} {% block script %}
 <script type="module" src="{% static 'mail/inbox.js' %}"></script>

@@ -25,3 +25,12 @@ export const markRead = (id) => {
     }),
   });
 };
+
+export const archiveEmail = (id, status) => {
+  return fetch(`/emails/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      archived: status,
+    }),
+  });
+};
