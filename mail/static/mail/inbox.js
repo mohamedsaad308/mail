@@ -17,7 +17,7 @@ function compose_email(recipients = "", subject = "", body = "") {
   document.querySelector("#compose-view").style.display = "block";
 
   // Clear out composition fields
-  document.querySelector("#compose-recipients").value = recipients;
+  document.querySelector("#compose-recipients").value = typeof recipients === "string" ? recipients : "";
   document.querySelector("#compose-subject").value = subject;
   document.querySelector("#compose-body").value = body;
 }
