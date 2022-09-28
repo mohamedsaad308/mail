@@ -130,7 +130,7 @@ function read_email(mailbox, curr) {
         replyElement.innerHTML = "Reply";
         const recipients = curr.sender;
         const subject = curr.subject.startsWith("Re:") ? curr.subject : "Re:" + curr.subject;
-        const body = `On ${curr.timestamp} ${curr.sender} wrote: ${curr.body}`;
+        const body = `On ${curr.timestamp} ${curr.sender} wrote: ${curr.body} \n \n`;
 
         element.addEventListener("click", () => archive_email(result.id, !result.archived), false);
         document.querySelector("#email-info").append(element);
